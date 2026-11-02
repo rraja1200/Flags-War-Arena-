@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#02050e" />
+  <title>Flags War Arena</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,700;0,800;0,900;1,800;1,900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      margin: 0;
+      padding: 0;
+      font-family: 'Montserrat', 'Segoe UI', Roboto, sans-serif;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: #02050e;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #phone-wrapper {
+      position: relative;
+      height: 98vh;
+      width: calc(98vh * (9 / 16));
+      max-width: 100vw;
+      max-height: 100vh;
+      aspect-ratio: 9 / 16;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 0 50px rgba(0, 0, 0, 0.9), inset 0 0 0 2px rgba(255, 255, 255, 0.18);
+      background: #04091a;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    @media (max-aspect-ratio: 9/16) {
+      #phone-wrapper {
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
+      }
+    }
+
+    .stadium-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 18% 28%, rgba(56, 189, 248, 0.38) 0%, transparent 45%),
+        radial-gradient(circle at 82% 28%, rgba(239, 68, 68, 0.38) 0%, transparent 45%),
+        radial-gradient(circle at 50% 20%, rgba(30, 64, 175, 0.5) 0%, rgba(4, 9, 26, 0.95) 60%),
+        linear-gradient(180deg, #040b24 0%, #071330 50%, #0b2916 68%, #155324 85%, #0c3818 100%);
+      z-index: 0;
+    }
+
+    .stadium-lights {
+      position: absolute;
+      top: 52%;
+      left: 0;
+      right: 0;
+      height: 65px;
+      background:
+        radial-gradient(ellipse at 12% 50%, rgba(255,255,255,0.75) 0%, transparent 50%),
+        radial-gradient(ellipse at 88% 50%, rgba(255,255,255,0.75) 0%, transparent 50%),
+        repeating-linear-gradient(90deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 3px, transparent 3px, transparent 10px);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .turf-floor {
+      position: absolute;
+      bottom: 0;
+      left: -20%;
+      right: -20%;
+      height: 43%;
+      background:
+        radial-gradient(circle at 50% 5%, rgba(74, 222, 128, 0.35), transparent 65%),
+        repeating-linear-gradient(
+          0deg,
+          rgba(16, 85, 35, 0.94) 0px,
+          rgba(16, 85, 35, 0.94) 15px,
+          rgba(22, 108, 46, 0.94) 15px,
+          rgba(22, 108, 46, 0.94) 30px
+        );
+      transform: perspective(380px) rotateX(55deg);
+      transform-origin: bottom center;
+      box-shadow: inset 0 25px 45px rgba(0,0,0,0.85);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .top-bar {
+      position: relative;
+      z-index: 10;
+      padding: 10px 12px 0 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .header-row {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .circle-icon-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(10, 18, 40, 0.9);
+      border: 1.5px solid rgba(255, 255, 255, 0.55);
+      color: #fff;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.6);
+    }
+    .circle-icon-btn:active { transform: scale(0.92); }
+
+    .title-text {
+      font-size: 18px;
+      font-weight: 900;
+      font-style: italic;
+      color: #ffffff;
+      letter-spacing: -0.3px;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.95);
+    }
+    .title-text span { color: #facc15; }
+
+    .live-viewer-group {
+      display: flex;
+      align-items: center;
+      background: rgba(10, 18, 40, 0.9);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 999px;
+      padding: 2px 8px 2px 2px;
+      gap: 6px;
+    }
+    .live-pill {
+      background: linear-gradient(90deg, #ff1f7a, #e11d48);
+      color: #fff;
+      font-size: 9.5px;
+      font-weight: 900;
+      padding: 3px 8px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .viewer-text {
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .dot-pulse {
+      width: 6px;
+      height: 6px;
+      background: #fff;
+      border-radius: 50%;
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.4); opacity: 0.45; }
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      justify-content: center;
+      margin-top: 2px;
+    }
+    .stat-box {
+      background: rgba(8, 17, 42, 0.86);
+      border: 1.5px solid rgba(255, 255, 255, 0.55);
+      border-radius: 13px;
+      padding: 4px 14px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 126px;
+      justify-content: center;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.65);
+      backdrop-filter: blur(6px);
+    }
+    .stat-label {
+      font-size: 10.5px;
+      color: #e2e8f0;
+      font-weight: 700;
+    }
+    .stat-num {
+      font-size: 20px;
+      color: #facc15;
+      font-weight: 900;
+      line-height: 1.05;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    }
+
+    .cycle-pill {
+      background: rgba(10, 18, 40, 0.9);
+      border: 1.2px solid rgba(255,255,255,0.45);
+      border-radius: 999px;
+      padding: 3px 16px;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.5);
+    }
+
+    .question-heading {
+      text-align: center;
+      line-height: 1.04;
+      margin-top: 1px;
+    }
+    .question-heading .line1 {
+      color: #ffffff;
+      font-size: 19px;
+      font-weight: 900;
+      font-style: italic;
+      text-shadow: 0 3px 6px rgba(0,0,0,0.95);
+    }
+    .question-heading .line2 {
+      color: #facc15;
+      font-size: 23px;
+      font-weight: 900;
+      font-style: italic;
+      text-shadow: 0 3px 6px rgba(0,0,0,0.95);
+    }
+    .red-swoosh {
+      width: 110px;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #ef4444, transparent);
+      margin: 2px auto 0 auto;
+      border-radius: 999px;
+    }
+
+    /* BADA CIRCLE ARENA (96% WIDTH) */
+    .arena-section {
+      position: relative;
+      z-index: 10;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    #arena-box {
+      position: relative;
+      width: 96%;
+      aspect-ratio: 1 / 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #arena-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    .arena-live-tag {
+      position: absolute;
+      bottom: -8px;
+      background: linear-gradient(180deg, #ff2a85 0%, #c80050 100%);
+      border: 2px solid #ff9ec7;
+      color: #fff;
+      font-weight: 900;
+      font-style: italic;
+      font-size: 13px;
+      padding: 2px 18px;
+      border-radius: 10px;
+      box-shadow: 0 0 16px rgba(255, 42, 133, 0.95);
+      letter-spacing: 0.5px;
+    }
+
+    .bottom-bar {
+      position: relative;
+      z-index: 10;
+      padding: 0 14px 12px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .elim-title {
+      color: #ffffff;
+      font-weight: 900;
+      font-style: italic;
+      font-size: 17px;
+      text-shadow: 0 2px 5px rgba(0,0,0,0.95);
+      cursor: pointer;
+    }
+
+    .progress-track {
+      width: 92%;
+      height: 12px;
+      background: rgba(9, 14, 28, 0.95);
+      border-radius: 999px;
+      border: 1.2px solid rgba(255,255,255,0.45);
+      padding: 1.5px;
+      overflow: hidden;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
+    }
+    #elim-progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #fde047, #facc15, #f97316);
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+    #elim-counter-label {
+      color: #ffffff;
+      font-size: 11.5px;
+      font-weight: 800;
+      margin-top: -3px;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+    }
+
+    .carousel-row {
+      width: 96%;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .arrow-btn {
+      background: none;
+      border: none;
+      color: #facc15;
+      font-size: 18px;
+      font-weight: 900;
+      cursor: pointer;
+      padding: 0 4px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    }
+    #elim-strip {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      min-height: 26px;
+      padding: 2px 0;
+      scroll-behavior: smooth;
+    }
+    #elim-strip::-webkit-scrollbar { display: none; }
+
+    .gold-pill {
+      background: linear-gradient(180deg, rgba(14, 18, 30, 0.96) 0%, rgba(5, 8, 16, 0.99) 100%);
+      border: 2px solid #eab308;
+      border-radius: 999px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.9), 0 0 12px rgba(234, 179, 8, 0.3);
+    }
+    #main-elim-banner {
+      width: 92%;
+      min-height: 42px;
+      padding: 5px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+    #elim-banner-flag {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #fff;
+      display: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.7);
+    }
+    #elim-banner-text {
+      color: #ef4444;
+      font-weight: 900;
+      font-size: 15px;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      text-align: center;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+    }
+
+    #like-cta-banner {
+      width: 92%;
+      min-height: 36px;
+      padding: 5px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+    #like-cta-banner:active { transform: scale(0.97); }
+    .like-text {
+      color: #ffffff;
+      font-weight: 900;
+      font-style: italic;
+      font-size: 12.5px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+    }
+
+    @keyframes popBanner {
+      0% { transform: scale(0.88); }
+      50% { transform: scale(1.06); }
+      100% { transform: scale(1); }
+    }
+    .animate-pop { animation: popBanner 0.35s ease-out; }
+
+    .modal-backdrop {
+      display: none;
+      position: absolute;
+      inset: 0;
+      z-index: 100;
+      background: rgba(2, 6, 23, 0.92);
+      backdrop-filter: blur(8px);
+      flex-direction: column;
+      padding: 16px;
+      overflow-y: auto;
+    }
+    .settings-card {
+      background: #0f172a;
+      border: 2px solid #eab308;
+      border-radius: 18px;
+      padding: 14px;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 0 35px rgba(0, 0, 0, 0.8);
+      margin: auto 0;
+    }
+    .setting-box {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 12px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .setting-title {
+      font-size: 11px;
+      font-weight: 900;
+      color: #facc15;
+      text-transform: uppercase;
+    }
+    .gender-btn {
+      flex: 1;
+      padding: 8px;
+      border-radius: 10px;
+      border: 1.5px solid rgba(255,255,255,0.25);
+      background: #1e293b;
+      color: #fff;
+      font-weight: 900;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .gender-btn.active {
+      background: linear-gradient(90deg, #db2777, #9333ea);
+      border-color: #fff;
+    }
+    .upload-label {
+      display: block;
+      width: 100%;
+      padding: 9px 10px;
+      background: linear-gradient(90deg, #059669, #10b981);
+      color: #fff;
+      font-weight: 900;
+      font-size: 11px;
+      text-align: center;
+      border-radius: 10px;
+      border: 1.5px solid #a7f3d0;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body onclick="unlockAudioOnFirstInteraction()" ontouchstart="unlockAudioOnFirstInteraction()">
+
+  <div id="phone-wrapper">
+    <div class="stadium-bg"></div>
+    <div class="stadium-lights"></div>
+    <div class="turf-floor"></div>
+
+    <audio id="custom-bgm-player" loop preload="auto"></audio>
+    <audio id="tts-cloud-player" preload="auto"></audio>
+
+    <div class="top-bar">
+      <div class="header-row">
+        <button class="circle-icon-btn" onclick="openSettingsModal(true)" title="Settings">⚙️</button>
+        <div class="title-text">Flags War <span>Arena</span></div>
+        <div class="live-viewer-group">
+          <div class="live-pill">
+            <span class="dot-pulse"></span>
+            <span>LIVE</span>
+          </div>
+          <div class="viewer-text">
+            <span>👁</span>
+            <span id="viewer-num">4,721</span>
+          </div>
+        </div>
+        <button class="circle-icon-btn" onclick="toggleElimModal(true)" title="Out Countries List">👥</button>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-box">
+          <span style="font-size:21px;">🌐</span>
+          <div style="text-align:center;">
+            <div class="stat-label">Countries</div>
+            <div id="stat-total" class="stat-num">64</div>
+          </div>
+        </div>
+        <div class="stat-box">
+          <span style="font-size:21px;">🎯</span>
+          <div style="text-align:center;">
+            <div class="stat-label">Remaining</div>
+            <div id="stat-remaining" class="stat-num">64</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cycle-pill">
+        <span id="cycle-text">Cycle 1</span>
+        <span class="dot-pulse" style="background:#ef4444;"></span>
+        <span>Live</span>
+      </div>
+
+      <div class="question-heading">
+        <div class="line1">Where Are</div>
+        <div class="line2">You From?</div>
+        <div class="red-swoosh"></div>
+      </div>
+    </div>
+
+    <div class="arena-section">
+      <div id="arena-box" onclick="boostRandomBall()">
+        <canvas id="arena-canvas"></canvas>
+        <div class="arena-live-tag">LIVE</div>
+      </div>
+    </div>
+
+    <div class="bottom-bar">
+      <div class="elim-title" onclick="toggleElimModal(true)">All Out</div>
+      <div class="progress-track">
+        <div id="elim-progress-bar"></div>
+      </div>
+      <div id="elim-counter-label">0 / 64 Out</div>
+
+      <div class="carousel-row">
+        <button class="arrow-btn" onclick="scrollCarousel(-120)">❮</button>
+        <div id="elim-strip"></div>
+        <button class="arrow-btn" onclick="scrollCarousel(120)">❯</button>
+      </div>
+
+      <div id="main-elim-banner" class="gold-pill" onclick="toggleElimModal(true)">
+        <img id="elim-banner-flag" src="https://flagcdn.com/w80/ir.png" alt="flag" />
+        <span id="elim-banner-text">IRAN OUT</span>
+      </div>
+
+      <div id="like-cta-banner" class="gold-pill" onclick="boostRandomBall()">
+        <span style="font-size:15px;">👍</span>
+        <span class="like-text">Like If You See Your Country Flag</span>
+      </div>
+    </div>
+
+    <div id="settings-modal" class="modal-backdrop">
+      <div class="settings-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.15);padding-bottom:8px;">
+          <h2 style="font-size:15px;font-weight:900;color:#fff;">⚙️ ARENA SETTINGS</h2>
+          <button onclick="openSettingsModal(false)" style="width:28px;height:28px;border-radius:50%;background:#e11d48;color:#fff;border:none;font-weight:900;cursor:pointer;">✕</button>
+        </div>
+
+        <div class="setting-box">
+          <div class="setting-title">🎙️ 1. AI Out Voice (Ladki / Ladka)</div>
+          <div style="display:flex;gap:8px;">
+            <button id="gender-female-btn" class="gender-btn active" onclick="setVoiceGender('female')">
+              👩 Female (लड़की)
+            </button>
+            <button id="gender-male-btn" class="gender-btn" onclick="setVoiceGender('male')">
+              👨 Male (लड़का)
+            </button>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+            <span style="font-size:12px;font-weight:800;">AI Voice Announcement</span>
+            <button id="modal-voice-toggle" onclick="toggleVoiceOnOff()" style="padding:5px 14px;border-radius:999px;background:#10b981;color:#fff;font-weight:900;font-size:11px;border:none;cursor:pointer;">
+              ON
+            </button>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:11px;color:#cbd5e1;">Voice Volume: <b id="voice-vol-text">100%</b></span>
+            <input type="range" min="10" max="100" value="100" oninput="changeVoiceVolume(this.value)" style="width:130px;accent-color:#ec4899;" />
+          </div>
+
+          <button onclick="testCurrentVoice()" style="padding:8px;border-radius:10px;background:#db2777;color:#fff;font-weight:900;font-size:11px;border:1px solid #fff;cursor:pointer;">
+            🔊 Test Voice ("America out!")
+          </button>
+        </div>
+
+        <div class="setting-box">
+          <div class="setting-title">🎵 2. Background Music (Apna Song Dalein)</div>
+          <label class="upload-label">
+            📂 Phone Se Apna Music Chunein (MP3 / Audio)
+            <input type="file" accept="audio/*" onchange="handleCustomMusicUpload(event)" style="display:none;" />
+          </label>
+          <div id="custom-music-status" style="font-size:10.5px;color:#a7f3d0;font-weight:700;text-align:center;">
+            Default: Soulful Background Music (40% Volume)
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+            <span style="font-size:12px;font-weight:800;">Background Music</span>
+            <button id="modal-music-toggle" onclick="toggleMusicOnOff()" style="padding:5px 14px;border-radius:999px;background:#10b981;color:#fff;font-weight:900;font-size:11px;border:none;cursor:pointer;">
+              ON
+            </button>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:11px;color:#cbd5e1;">Music Volume: <b id="music-vol-text">40%</b></span>
+            <input type="range" min="0" max="100" value="40" oninput="changeMusicVolume(this.value)" style="width:130px;accent-color:#10b981;" />
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;">
+          <button onclick="resetArenaRound();openSettingsModal(false);" style="flex:1;padding:10px;border-radius:999px;background:#3b82f6;color:#fff;font-weight:900;font-size:12px;border:none;cursor:pointer;">
+            🔄 Restart Match
+          </button>
+          <button onclick="openSettingsModal(false)" style="flex:1;padding:10px;border-radius:999px;background:linear-gradient(90deg,#f59e0b,#ec4899);color:#fff;font-weight:900;font-size:12px;border:none;cursor:pointer;">
+            ✅ Done
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="eliminated-modal" class="modal-backdrop">
+      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.2);padding-bottom:10px;">
+        <h2 s
